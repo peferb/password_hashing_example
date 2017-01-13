@@ -13,13 +13,13 @@ import se.peferb.security.model.User;
 
 public class UserRepository {
 
-    private Collection<User> users = new ArrayList<User>();
-    private final int hashingIterations = 100000;
+    private Collection<User> users = new ArrayList<>();
+    private final int hashingIterations = 10000;
     private final int hashSize = 2048;
 
     public User createUser(String username, String password) {
         byte[] salt = generateSalt();
-        byte[] hashedPassword = hashPassword(password,salt, hashingIterations, hashSize);
+        byte[] hashedPassword = hashPassword(password, salt, hashingIterations, hashSize);
         User user = new User(username, hashedPassword, salt, hashingIterations);
         users.add(user);
         return user;
@@ -49,6 +49,7 @@ public class UserRepository {
     }
 
     public boolean isAuthorized(String username, String password) throws NotFoundException {
+
         Optional<User> user = users.stream().filter(u -> u.getUsername().equals(username)).findFirst();
         if (!user.isPresent()) throw new NotFoundException(String.format("Cannot find User '%s'", username));
 
@@ -58,6 +59,6 @@ public class UserRepository {
     }
 
     private boolean equalPasswords(String password, byte[] salt, byte[] hashedPassword) {
-        return false;
+        return new String(hashedPassword).equals(new String(hashPassword(password, salt, hashingIterations, hashSize)));
     }
 }
